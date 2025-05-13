@@ -27,6 +27,7 @@ import {
   AccountCircle as AccountIcon,
   PersonAdd as PersonAddIcon,
 } from '@mui/icons-material';
+import ThemeToggle from './ThemeToggle';
 
 const drawerWidth = 240;
 
@@ -134,6 +135,7 @@ export default function Layout({ children }: LayoutProps) {
           </IconButton>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <ThemeToggle />
             <Tooltip title="Notifications">
               <IconButton color="primary">
                 <Badge badgeContent={3} color="error">
