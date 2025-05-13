@@ -24,10 +24,10 @@ import {
   AttachMoney as SalesIcon,
   People as CustomersIcon,
   Notifications as NotificationsIcon,
-  AccountCircle as AccountIcon,
   PersonAdd as PersonAddIcon,
 } from '@mui/icons-material';
 import ThemeToggle from './ThemeToggle';
+import { AuthButton } from './AuthButton';
 
 const drawerWidth = 240;
 
@@ -143,11 +143,7 @@ export default function Layout({ children }: LayoutProps) {
                 </Badge>
               </IconButton>
             </Tooltip>
-            <Tooltip title="Account">
-              <IconButton color="primary">
-                <AccountIcon />
-              </IconButton>
-            </Tooltip>
+            <AuthButton />
           </Box>
         </Toolbar>
       </AppBar>
