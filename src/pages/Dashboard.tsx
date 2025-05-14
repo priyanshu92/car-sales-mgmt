@@ -24,10 +24,18 @@ const SummaryCard = ({ title, value, icon, color, progress }: {
       '&:hover': {
         transform: 'translateY(-5px)',
         boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
+        '& .summary-card-icon-container': {
+          transform: 'scale(1.5) rotate(7deg)',
+        },
+        '& .summary-card-bg-pattern': {
+          opacity: 0.15,
+          transform: 'translate(20%, -20%) rotate(50deg) scale(1.2)',
+        }
       },
     }}
   >
     <Box
+      className="summary-card-bg-pattern"
       sx={{
         position: 'absolute',
         top: 0,
@@ -37,6 +45,7 @@ const SummaryCard = ({ title, value, icon, color, progress }: {
         opacity: 0.1,
         transform: 'translate(30%, -30%) rotate(45deg)',
         backgroundColor: color,
+        transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
       }}
     />
     <CardContent sx={{ flexGrow: 1, position: 'relative', zIndex: 1 }}>
@@ -44,7 +53,16 @@ const SummaryCard = ({ title, value, icon, color, progress }: {
         <Typography color="text.secondary" variant="h6" sx={{ fontWeight: 500 }}>
           {title}
         </Typography>
-        <Box sx={{ color, transform: 'scale(1.2)' }}>{icon}</Box>
+        <Box 
+          className="summary-card-icon-container" 
+          sx={{ 
+            color, 
+            transform: 'scale(1.2)', 
+            transition: 'transform 0.3s ease-in-out' 
+          }}
+        >
+          {icon}
+        </Box>
       </Box>
       <Typography component="p" variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
         {value}
@@ -118,4 +136,4 @@ export default function Dashboard() {
       </Grid>
     </Box>
   );
-} 
+}

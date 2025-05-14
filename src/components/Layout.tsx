@@ -39,9 +39,14 @@ const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
   { text: 'Inventory', icon: <CarIcon />, path: '/inventory' },
   { text: 'Sales', icon: <SalesIcon />, path: '/sales' },
-  { text: 'Sales Leads', icon: <PersonAddIcon />, path: '/leads' },
   { text: 'Customers', icon: <CustomersIcon />, path: '/customers' },
 ];
+
+const isSalesPerson  = (window as any)["Microsoft"]?.Dynamic365?.Portal?.User?.userRoles?.includes("Sales Person") ?? false;
+
+if (isSalesPerson) {
+  menuItems.push({ text: 'Sales Leads', icon: <PersonAddIcon />, path: '/leads' });
+}
 
 export default function Layout({ children }: LayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -97,13 +102,13 @@ export default function Layout({ children }: LayoutProps) {
             >
               {item.icon}
             </ListItemIcon>
-            <ListItemText 
-              primary={item.text} 
-              sx={{ 
-                '& .MuiTypography-root': { 
-                  fontWeight: location.pathname === item.path ? 600 : 400 
-                } 
-              }} 
+            <ListItemText
+              primary={item.text}
+              sx={{
+                '& .MuiTypography-root': {
+                  fontWeight: location.pathname === item.path ? 600 : 400
+                }
+              }}
             />
           </ListItem>
         ))}
@@ -199,4 +204,4 @@ export default function Layout({ children }: LayoutProps) {
       </Box>
     </Box>
   );
-} 
+}

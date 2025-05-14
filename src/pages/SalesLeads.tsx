@@ -9,89 +9,75 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  IconButton,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
-import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
 interface Lead {
-  id: number;
+  accountId: number;
   name: string;
-  email: string;
-  phone: string;
-  status: string;
-  notes: string;
+  type: string;
+  description: string;
+  amount: string;
 }
 
-const initialLeads: Lead[] = [
-  {
-    id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '123-456-7890',
-    status: 'New',
-    notes: 'Interested in SUV models',
-  },
-  {
-    id: 2,
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    phone: '098-765-4321',
-    status: 'Contacted',
-    notes: 'Looking for sedan options',
-  },
-];
-
 const SalesLeads: React.FC = () => {
-  const [leads, setLeads] = useState<Lead[]>(initialLeads);
-  const [open, setOpen] = useState(false);
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [formData, setFormData] = useState<Partial<Lead>>({});
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUnauthorized, setIsUnauthorized] = useState(false);
 
-  const handleOpen = (lead?: Lead) => {
-    if (lead) {
-      setSelectedLead(lead);
-      setFormData(lead);
-    } else {
-      setSelectedLead(null);
-      setFormData({});
+  //Create FetchXML query to get all cards from Dataverse
+  const fetchLeads = async () => {
+    try {
+      const response = await fetch("/_api/cr2de_opportunities");
+      
+      if (response.status === 403) {
+        setIsUnauthorized(true);
+        return [];
+      }
+      
+      if (!response.ok) {
+        throw new Error(`API call failed with status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const leads = data.value;
+      const returnData: Lead[] = [];
+
+      //loop through the cards and get the name and id of each card
+      for (let i = 0; i < leads.length; i++) {
+        const lead = leads[i];
+        const accountId = lead.cr2de_accountid;
+        const name = lead.cr2de_name;
+        const type = lead.cr2de_type;
+        const description = lead.cr2de_description;
+        const amount = lead.cr2de_amount;
+        returnData.push({ accountId, name, type, description, amount });
+      }
+
+      return returnData;
+    } catch (error) {
+      console.error('Error fetching leads:', error);
+      throw error;
     }
-    setOpen(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-    setSelectedLead(null);
-    setFormData({});
-  };
-
-  const handleSubmit = () => {
-    if (selectedLead) {
-      setLeads(leads.map(lead => 
-        lead.id === selectedLead.id ? { ...lead, ...formData } : lead
-      ));
-    } else {
-      const newLead: Lead = {
-        id: leads.length + 1,
-        name: formData.name || '',
-        email: formData.email || '',
-        phone: formData.phone || '',
-        status: formData.status || 'New',
-        notes: formData.notes || '',
-      };
-      setLeads([...leads, newLead]);
-    }
-    handleClose();
-  };
-
-  const handleDelete = (id: number) => {
-    setLeads(leads.filter(lead => lead.id !== id));
-  };
+  React.useEffect(() => {
+    const loadLeads = async () => {
+      try {
+        setIsLoading(true);
+        setIsUnauthorized(false);
+        const leads = await fetchLeads();
+        setLeads(leads);
+      } catch (error) {
+        console.error('Error fetching leads:', error);
+        // You might want to show an error state here
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadLeads();
+  }, []);
 
   return (
     <Box sx={{ p: 3 }}>
@@ -99,101 +85,44 @@ const SalesLeads: React.FC = () => {
         <Typography variant="h4" gutterBottom>
           Sales Leads
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpen()}
-        >
-          Add Lead
-        </Button>
       </Box>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Notes</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {leads.map((lead) => (
-              <TableRow key={lead.id}>
-                <TableCell>{lead.name}</TableCell>
-                <TableCell>{lead.email}</TableCell>
-                <TableCell>{lead.phone}</TableCell>
-                <TableCell>{lead.status}</TableCell>
-                <TableCell>{lead.notes}</TableCell>
-                <TableCell>
-                  <IconButton onClick={() => handleOpen(lead)}>
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton onClick={() => handleDelete(lead.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {isUnauthorized && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          You are not authorized to view this data. Please contact your administrator.
+        </Alert>
+      )}
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>
-          {selectedLead ? 'Edit Lead' : 'Add New Lead'}
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Name"
-            fullWidth
-            value={formData.name || ''}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="Email"
-            type="email"
-            fullWidth
-            value={formData.email || ''}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="Phone"
-            fullWidth
-            value={formData.phone || ''}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="Status"
-            fullWidth
-            value={formData.status || ''}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-          />
-          <TextField
-            margin="dense"
-            label="Notes"
-            fullWidth
-            multiline
-            rows={4}
-            value={formData.notes || ''}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
-            {selectedLead ? 'Save' : 'Add'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {isLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Account Id</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Type</TableCell>
+                <TableCell>Description</TableCell>
+                <TableCell>Amount</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {leads.map((lead) => (
+                <TableRow key={lead.accountId}>
+                  <TableCell>{lead.accountId}</TableCell>
+                  <TableCell>{lead.name}</TableCell>
+                  <TableCell>{lead.type}</TableCell>
+                  <TableCell>{lead.description}</TableCell>
+                  <TableCell>{lead.amount}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </Box>
   );
 };
