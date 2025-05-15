@@ -33,6 +33,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   // Update localStorage when theme changes
   useEffect(() => {
     localStorage.setItem('themeMode', mode);
+    // Apply theme class to body for additional styling hooks
+    document.body.classList.remove('light-mode', 'dark-mode');
+    document.body.classList.add(`${mode}-mode`);
   }, [mode]);
 
   // Toggle between light and dark modes
@@ -46,51 +49,51 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       mode,
       ...(mode === 'light'
         ? {
-            // Light theme colors
-            primary: {
-              main: '#1a237e', // Deep blue
-              light: '#534bae',
-              dark: '#000051',
-              contrastText: '#ffffff',
-            },
-            secondary: {
-              main: '#c2185b', // Deep pink
-              light: '#fa5788',
-              dark: '#8c0032',
-              contrastText: '#ffffff',
-            },
-            background: {
-              default: '#f5f5f5',
-              paper: '#ffffff',
-            },
-            text: {
-              primary: '#212121',
-              secondary: '#757575',
-            },
-          }
+          // Light theme colors
+          primary: {
+            main: '#1a237e', // Deep blue
+            light: '#534bae',
+            dark: '#000051',
+            contrastText: '#ffffff',
+          },
+          secondary: {
+            main: '#c2185b', // Deep pink
+            light: '#fa5788',
+            dark: '#8c0032',
+            contrastText: '#ffffff',
+          },
+          background: {
+            default: '#f5f5f5',
+            paper: '#ffffff',
+          },
+          text: {
+            primary: '#212121',
+            secondary: '#757575',
+          },
+        }
         : {
-            // Dark theme colors
-            primary: {
-              main: '#534bae', // Lighter blue for dark mode
-              light: '#8271de',
-              dark: '#1a237e',
-              contrastText: '#ffffff',
-            },
-            secondary: {
-              main: '#f06292', // Lighter pink for dark mode
-              light: '#ff94c2',
-              dark: '#ba2d65',
-              contrastText: '#ffffff',
-            },
-            background: {
-              default: '#121212',
-              paper: '#1e1e1e',
-            },
-            text: {
-              primary: '#ffffff',
-              secondary: '#b0b0b0',
-            },
-          }),
+          // Dark theme colors
+          primary: {
+            main: '#8271de', // Lighter blue for dark mode
+            light: '#b39ddb',
+            dark: '#534bae',
+            contrastText: '#ffffff',
+          },
+          secondary: {
+            main: '#f06292', // Lighter pink for dark mode
+            light: '#ff94c2',
+            dark: '#ba2d65',
+            contrastText: '#ffffff',
+          },
+          background: {
+            default: '#121212',
+            paper: '#1e1e1e',
+          },
+          text: {
+            primary: '#ffffff',
+            secondary: '#b0b0b0',
+          },
+        }),
     },
     typography: {
       fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
@@ -174,10 +177,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   });
 
   return (
-    <ThemeContext.Provider value={{ mode, toggleTheme }}>
-      <MuiThemeProvider theme={theme}>
-        <CssBaseline />
-        {children}
+    <ThemeContext.Provider value={ { mode, toggleTheme } }>
+      <MuiThemeProvider theme={ theme }>
+        <CssBaseline enableColorScheme />
+        { children }
       </MuiThemeProvider>
     </ThemeContext.Provider>
   );
